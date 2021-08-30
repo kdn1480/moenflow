@@ -3,6 +3,8 @@
 const puppeteer = require('puppeteer-core');
 const sleep = require("sleep-promise");
 const date = require('date-and-time');
+var argv = require('yargs/yargs')(process.argv.slice(2)).argv;
+
 
 const userid = process.env.FLOUSER
 const password = process.env.FLOPASSWORD
@@ -10,13 +12,30 @@ const password = process.env.FLOPASSWORD
 //console.log("userid:%s" , userid);
 //console.log("password:%s" , password);
 let errorCount = 0;
+let commands = 0;
+
+if (argv.log ){
+	commands = commands + 1
+}
+
+if (argv.exec ){
+	commands = commands + 1
+}
 
 if (typeof userid === "undefined"){
-	console.log("userid not set in FLOUSER");
+	console.log("userid not set in env variable FLOUSER");
 	errorCount = errorCount + 1
 }
 if (typeof password === "undefined"){
-	console.log("password is not set in FLOPASSWORD");
+	console.log("password is not set in env variable FLOPASSWORD");
+	errorCount = errorCount + 1
+}
+
+if ( commands == 0 ){
+	console.log("Usage:");
+	console.log("       --log logfile");
+	console.log("env FLOUSER email_address");
+	console.log("env FLOPASSWORD password");
 	errorCount = errorCount + 1
 }
 
@@ -84,8 +103,11 @@ if (errorCount > 0){
           //let logmsg = timenow + " epoc " + epoc pressure ${pressure} rate ${gpm} temp ${temp} consume ${galcon} state ${stateVal}"
           //console.log(`${timenow} epoc ${epoc} pressure ${pressure} rate ${gpm} temp ${temp} consume ${galcon} state ${stateVal}`)
 	  console.log(logmsg)
-	  const fs = require('fs');
-	  fs.appendFileSync('waterlog.dat', logmsg + "\n");
+
+	  if (argv.log != ''){
+		  const fs = require('fs');
+		  fs.appendFileSync(argv.log, logmsg + "\n");
+	  }
 
 	  const tags = await page.$$('txt')
 	  //console.log("after tags %d", tags.length);
