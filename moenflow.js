@@ -34,6 +34,7 @@ if (typeof password === "undefined"){
 if ( commands == 0 ){
 	console.log("Usage:");
 	console.log("       --log logfile");
+	console.log("       --exec runprogram");
 	console.log("env FLOUSER email_address");
 	console.log("env FLOPASSWORD password");
 	errorCount = errorCount + 1
@@ -107,6 +108,23 @@ if (errorCount > 0){
 	  if (argv.log != ''){
 		  const fs = require('fs');
 		  fs.appendFileSync(argv.log, logmsg + "\n");
+	  }
+
+	  if (argv.exec != ''){
+		  console.log("execing:" + logmsg);
+		  const { spawn } = require("child_process");
+		  const cmd2run = spawn("./update.py",[logmsg]);
+		  cmd2run.stdout.on("data", data => {
+			  console.log(`stdout ${data}`);
+		  })
+		  cmd2run.stderr.on("data", data => {
+			  console.log(`stderr: ${data}`);
+		  });
+		  cmd2run.on('error',(error) => {
+			  console.log(`error: ${error.message}`);
+		  });
+
+
 	  }
 
 	  const tags = await page.$$('txt')
